@@ -1,5 +1,5 @@
 from .gptpipe import OpenAIPipe
-from .VllmPipe import VllmPipe
+from .vllmpipe import VllmPipe
 
 PIPELINE_SOURCES = {
     'OpenAI' : OpenAIPipe,

@@ -1,5 +1,6 @@
 from .modelwrapper import _WrappedPipeline
 from .gptpipe import OpenAIPipe
+from .vllmpipe import VllmPipe
 from .pipeline_sources import PIPELINE_SOURCES
 from ..abstract import Pipeline
 from ..types import Model
@@ -19,10 +20,17 @@ class Pipelines:
         return OpenAIPipe(model, **kwargs)
 
     @staticmethod
+    def vLLM(
+        model : str | None = 'tiiuae/falcon-rw-1b',
+        **kwargs
+    ) -> Pipeline:
+        return VllmPipe(model, **kwargs)
+
+    @staticmethod
     def from_model(
         model : Model
     ) -> Pipeline:
         if model.source not in PIPELINE_SOURCES:
             raise Exception(f'Source {model.source} not found in pipeline_sources.py')
         pipe_ = PIPELINE_SOURCES[model.source]
-        return pipe_(model.model, model.config)
+        return pipe_(model.model, **model.config)

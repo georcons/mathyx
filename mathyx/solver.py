@@ -1,7 +1,7 @@
 from typing import List
 from .abstract import Pipeline, Formatizer
 from .models import Pipelines
-from .types import Pass, PromptResult, Evaluation
+from .types import Model, Pass, PromptResult, Evaluation
 from .utils import DefaultFormatizer
 
 class Solver:
@@ -11,11 +11,13 @@ class Solver:
     def __init__(
         self,
         *,
-        pipeline : Pipeline | None = None,
+        pipeline : Pipeline | Model | None = None,
         model : str | None = None,
         load : bool | None = True,
         **kwargs
     ):
+        if isinstance(pipeline, Model):
+            pipeline = Pipelines.from_model(pipeline)
         _pipe = pipeline if pipeline is not None else Pipelines.OpenAI()
         self.__pipeline = Pipelines.wrap(_pipe)
         if model is not None:

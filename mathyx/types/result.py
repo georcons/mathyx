@@ -127,7 +127,7 @@ class PromptResult:
 
 # Used to store a list of instances of Prompt
 class Evaluation:
-    __prompts = List[PromptResult]
+    __prompts : List[PromptResult]
     extract_answer : Callable[[str], str] | None
 
     # Initialize from a list of Prompt
@@ -135,7 +135,7 @@ class Evaluation:
         self,
         results : List[PromptResult]
     ):
-        self.__results = results
+        self.__prompts = results
         self.extract_answer = None
 
     # Alternatively, initialize from a list of list of strings
@@ -153,13 +153,11 @@ class Evaluation:
                     PromptResult(result, prompt=prompt) for prompt, result in zip(prompt, results)
                 ]
         else: output = [PromptResult(result) for result in results]
-        return Result(output)
+        return Evaluation(output)
 
     # Restore the original list of lists
     def to_list(self):
-        return [
-                prompt_result.to_list() for prompt_result in self.__prompts
-        ]
+        return [prompt_result.to_list() for prompt_result in self.__prompts]
 
     # Set queries for each result
     def set_prompts(
@@ -168,7 +166,7 @@ class Evaluation:
     ) -> None:
         if len(queries) != len(self):
             raise Exception('Number of queries must be the same as number of resutls.')
-        for query, result in zip(queries, self.__results):
+        for query, result in zip(queries, self.__prompts):
             result.set_prompt(query)
 
     # Set statements for each result
@@ -178,14 +176,14 @@ class Evaluation:
     ) -> None:
         if len(statements) != len(self):
             raise Exception('Number of statements must be the same as number of resutls.')
-        for statement, result in zip(statements, self.__results):
+        for statement, result in zip(statements, self.__prompts):
             result.set_statement(statement)
 
     # Get correct answers from object
     def correct_answers(
         self
     ) -> List[str]:
-        return [prompt.correct_answer for prompt in self.__results]
+        return [prompt.correct_answer for prompt in self.__prompts]
 
     # Get answers from the results
     def answers(
@@ -199,7 +197,7 @@ class Evaluation:
                             if self.extract_answer is not None 
                             else DefaultFormatizer.extract_answer
         )
-        return [result.answers(extract_answer) for result in self.__results]
+        return [result.answers(extract_answer) for result in self.__prompts]
 
     # Grade each of the results in the list
     def grade(
@@ -209,20 +207,20 @@ class Evaluation:
         extract_answer : Callable[[str], str] | None = None
     ) -> List[float]:
         if ground_truth_answers is not None:
-            if len(ground_truth_answers) != len(self.__results):
+            if len(ground_truth_answers) != len(self.__prompts):
                 raise Exception('Number of ground-truth answers must the same at results in the list.')
-            return [result.grade(ans, extract_answer=extract_answer) for ans, result in zip(ground_truth_answers, self.__results)]
-        else: return [result.grade(extract_answer=extract_answer) for result in self.__results]
+            return [result.grade(ans, extract_answer=extract_answer) for ans, result in zip(ground_truth_answers, self.__prompts)]
+        else: return [result.grade(extract_answer=extract_answer) for result in self.__prompts]
 
     # System methods
     def __len__(self):
-        return len(self.__results)
+        return len(self.__prompts)
 
     def __getitem__(self, index):
-        return self.__results[index]
+        return self.__prompts[index]
 
     def __iter__(self):
-        return iter(self.__results)
+        return iter(self.__prompts)
 
     def __str__(self):
         return str(self.to_list())

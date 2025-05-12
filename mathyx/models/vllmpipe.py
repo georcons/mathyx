@@ -18,13 +18,14 @@ A pipeline to run vLLM.
 class VllmPipe(Pipeline):
     def __init__(
         self,
-        model : str | None = 'mistralai/Mistral-7B-Instruct-v0.1',
+        model : str | None = 'tiiuae/falcon-rw-1b',
         *,
         temperature : float | None = 1.0,
         max_tokens : int | None = None,
         gpu_count : int | None = 1
     ):
         self.model = model
+        self.config = {}
         self.config['temperature'] = temperature
         self.config['max_tokens'] = max_tokens
         self.config['gpu_count'] = gpu_count
@@ -43,7 +44,7 @@ class VllmPipe(Pipeline):
         *,
         response_count : int | None = 1
     ) -> Evaluation:
-        os.environ['CUDA_VISIBLE_DEVICES'] = ','.join([str(i) for i in range(self.gpu_count)])
+        os.environ['CUDA_VISIBLE_DEVICES'] = ','.join([str(i) for i in range(self.config['gpu_count'])])
         # Load LLM
         llm = LLM(model=self.model, gpu_memory_utilization=0.9, tensor_parallel_size=self.config['gpu_count'])
         # Set up sampling parameters
@@ -74,7 +75,7 @@ class VllmPipe(Pipeline):
 
     def use_multiple_sync(self): return True
 
-    def __split_array(arr, n):
+    def __split_array(self, arr, n):
         avg = len(arr) // n
         remainder = len(arr) % n
         result = []

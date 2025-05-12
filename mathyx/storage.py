@@ -217,6 +217,18 @@ class Storage:
         pids = [int(_id) for _id in problem_set['problem_ids'].split(',')]
         return self.__statements[self.__statements[_RESERVED_ID_COLUMN].isin(pids)]
 
+    def statements(
+        self,
+        set_name : str | None = None
+    ) -> List[str]:
+        return self.problems(set_name)[_STATEMENT_COLUMN].to_list()
+
+    def answers(
+        self,
+        set_name : str | None = None
+    ) -> List[str]:
+        return self.problems(set_name)['answer'].to_list()
+
     @modify
     def add_problems(
         self,
